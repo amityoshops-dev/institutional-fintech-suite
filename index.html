@@ -1,0 +1,267 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BharatRails - DPI Enterprise Control Plane</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .active-tab { border-bottom: 2px solid #3b82f6; color: #60a5fa; }
+        .inactive-tab { border-bottom: 2px solid transparent; color: #9ca3af; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-mono min-h-screen flex flex-col">
+
+    <!-- Top Navigation Header -->
+    <header class="border-b border-slate-800 bg-slate-900/60 px-6 py-4 flex flex-wrap justify-between items-center sticky top-0 z-50 backdrop-blur">
+        <div class="flex items-center space-x-3">
+            <span class="p-2 bg-blue-600 rounded text-lg font-bold">BR</span>
+            <div>
+                <h1 class="font-bold tracking-wider text-base sm:text-lg">BHARATRAILS DPI SUITE</h1>
+                <p class="text-xs text-slate-400">Institutional Multi-Rail Clearing & Escrow Control Plane</p>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="flex space-x-6 mt-3 sm:mt-0 text-sm font-semibold">
+            <button onclick="switchTab('ops-view')" id="tab-ops" class="active-tab py-1 hover:text-blue-400 transition">Console & Telemetry</button>
+            <button onclick="switchTab('prd-view')" id="tab-prd" class="inactive-tab py-1 hover:text-blue-400 transition">Institutional PRD & Architecture</button>
+            <button onclick="switchTab('audit-view')" id="tab-audit" class="inactive-tab py-1 hover:text-blue-400 transition">Double-Entry Ledger Audit</button>
+        </nav>
+    </header>
+
+    <!-- Tab 1: Live Operations View -->
+    <main id="ops-view" class="p-6 max-w-7xl mx-auto w-full space-y-6">
+        <!-- Balance Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-lg shadow">
+                <div class="text-xs text-slate-400 uppercase tracking-wider">Tax Escrow Holding</div>
+                <div id="tax-escrow" class="text-2xl font-bold text-emerald-400 mt-2">₹0.00</div>
+                <div class="text-[11px] text-emerald-500 mt-1">● 18% GST Isolated (ACC-GST-ESCROW)</div>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-lg shadow">
+                <div class="text-xs text-slate-400 uppercase tracking-wider">Supplier Net Balance</div>
+                <div id="supplier-bal" class="text-2xl font-bold text-blue-400 mt-2">₹0.00</div>
+                <div class="text-[11px] text-blue-500 mt-1">● Base Commercial Settlement</div>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-lg shadow">
+                <div class="text-xs text-slate-400 uppercase tracking-wider">UPI Overdraft Drawn</div>
+                <div id="upi-od" class="text-2xl font-bold text-amber-400 mt-2">₹0.00</div>
+                <div class="text-[11px] text-amber-500 mt-1">● Secondary Drawdown</div>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-lg shadow">
+                <div class="text-xs text-slate-400 uppercase tracking-wider">Mule Threat Status</div>
+                <div id="mule-status" class="text-2xl font-bold text-rose-400 mt-2">MONITORING</div>
+                <div class="text-[11px] text-slate-400 mt-1">● Port 8002 Graph Watchdog</div>
+            </div>
+        </div>
+
+        <!-- Action Controls & Stream -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-slate-900 border border-slate-800 p-5 rounded-lg space-y-4">
+                <h2 class="text-sm font-bold tracking-wide uppercase text-slate-300">Action Controls</h2>
+                <button onclick="runConsent()" class="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 rounded font-semibold text-xs tracking-wider transition">1. Trigger Setu AA Consent Flow</button>
+                <button onclick="pullData()" class="w-full py-2.5 px-4 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded font-semibold text-xs tracking-wider transition">2. Pull Setu AA Financial Data</button>
+                <button onclick="triggerInvoiceSettlement()" class="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 rounded font-semibold text-xs tracking-wider transition">3. Simulate M2M ERP Invoice Settlement</button>
+            </div>
+
+            <div class="md:col-span-2 bg-black border border-slate-800 rounded-lg p-4 flex flex-col h-96">
+                <div class="flex justify-between items-center mb-2 pb-2 border-b border-slate-800 text-xs">
+                    <span class="text-emerald-400 font-bold">● INBOUND TELEMETRY STREAM</span>
+                    <button onclick="clearLogs()" class="text-slate-500 hover:text-slate-300 text-xs">Clear Console</button>
+                </div>
+                <pre id="stream-box" class="flex-1 overflow-y-auto text-xs text-emerald-400 font-mono whitespace-pre-wrap leading-relaxed">[SYSTEM READY] BharatRails gateway listening on Port 8080...</pre>
+            </div>
+        </div>
+    </main>
+
+    <!-- Tab 2: Institutional PRD & Architecture Spec -->
+    <main id="prd-view" class="p-6 max-w-5xl mx-auto w-full space-y-8 hidden">
+        <div class="bg-slate-900 border border-slate-800 p-6 rounded-lg space-y-4">
+            <h2 class="text-xl font-bold text-blue-400">Institutional Product Requirement Document (PRD)</h2>
+            <p class="text-xs text-slate-400">Document Spec: BR-DPI-2026-v2 | Domain: RBI PA/PG Nodal Accounting & DPI Rails</p>
+            <hr class="border-slate-800">
+
+            <div class="space-y-4 text-sm text-slate-300 leading-relaxed">
+                <h3 class="font-bold text-slate-100 text-base">1. Problem Statement & Regulatory Context</h3>
+                <p>Commercial B2B settlement flows regularly fail audit compliance because tax liabilities (GST) are co-mingled with supplier payables. Under RBI Guidelines on Payment Aggregators (PAs), all collected funds must reside in pooled nodal accounts with immediate automated isolation of statutory taxes into non-operating escrow accounts.</p>
+
+                <h3 class="font-bold text-slate-100 text-base">2. Architecture & Data Flow</h3>
+                <div class="bg-black p-4 rounded border border-slate-800 text-xs font-mono text-slate-300">
+                    ERP (Frappe / ERPNext) --[M2M REST Webhook]--> BharatRails Ingress Gateway (Port 8080)
+                    ├── Double-Entry Engine:
+                    │   ├── Debits: ACC-CUSTOMER-RECEIVABLE (Grand Total)
+                    │   ├── Credits: ACC-GST-ESCROW (18% Statutory Tax Isolated)
+                    │   └── Credits: ACC-SUPPLIER-PAYABLE (Net Commercial Value)
+                    ├── Account Aggregator (Setu Sandbox / Sahamati Rail):
+                    │   └── Extracts 180-Day Cash Flow Profile --> ULI Underwriting Engine
+                    └── Graph Risk Engine (Port 8002):
+                        └── Monitors Transaction Fan-Out --> Applies Automated Lien Freezes
+                </div>
+
+                <h3 class="font-bold text-slate-100 text-base">3. Monetization & Commercial Mechanics</h3>
+                <ul class="list-disc pl-5 space-y-1 text-xs text-slate-400">
+                    <li><strong>Treasury Float Yield:</strong> Interest yield generated on aggregated GST held in nodal escrow pending statutory tax clearance.</li>
+                    <li><strong>Basis-Point Take Rate:</strong> 15-45 bps charged on gross settled B2B invoice volume.</li>
+                    <li><strong>Lending Spread (ULI/LSP):</strong> 1.5-2.0% origination fee on automated working capital sanctioned via AA statement analysis.</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <!-- Tab 3: Real-Time Double-Entry Ledger View -->
+    <main id="audit-view" class="p-6 max-w-5xl mx-auto w-full space-y-6 hidden">
+        <div class="bg-slate-900 border border-slate-800 p-6 rounded-lg space-y-4">
+            <div class="flex justify-between items-center">
+                <h2 class="text-lg font-bold text-slate-200">Double-Entry General Ledger Accounts</h2>
+                <button onclick="syncMetrics()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1 rounded border border-slate-700">Refresh Ledger</button>
+            </div>
+            
+            <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                    <tr class="border-b border-slate-800 text-slate-400 uppercase">
+                        <th class="py-3 px-2">Account Code</th>
+                        <th class="py-3 px-2">Account Type</th>
+                        <th class="py-3 px-2">Regulatory Purpose</th>
+                        <th class="py-3 px-2 text-right">Cleared Balance</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800 font-mono">
+                    <tr>
+                        <td class="py-3 px-2 text-emerald-400">ACC-GST-ESCROW</td>
+                        <td class="py-3 px-2">Liability / Escrow</td>
+                        <td class="py-3 px-2 text-slate-400">Statutory Tax Sequestration (RBI Nodal Pool)</td>
+                        <td id="audit-tax" class="py-3 px-2 text-right text-emerald-400 font-bold">₹0.00</td>
+                    </tr>
+                    <tr>
+                        <td class="py-3 px-2 text-blue-400">ACC-SUPPLIER-PAYABLE</td>
+                        <td class="py-3 px-2">Payable / Current</td>
+                        <td class="py-3 px-2 text-slate-400">Base Commercial Settlement to Supplier</td>
+                        <td id="audit-supplier" class="py-3 px-2 text-right text-blue-400 font-bold">₹0.00</td>
+                    </tr>
+                    <tr>
+                        <td class="py-3 px-2 text-amber-400">ACC-UPI-CREDIT-FACILITY</td>
+                        <td class="py-3 px-2">Credit / OD Line</td>
+                        <td class="py-3 px-2 text-slate-400">Delegated UPI Circle Secondary Drawdown</td>
+                        <td id="audit-upi" class="py-3 px-2 text-right text-amber-400 font-bold">₹0.00</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        let currentConsentId = "";
+
+        function switchTab(tabId) {
+            ['ops-view', 'prd-view', 'audit-view'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(tabId).classList.remove('hidden');
+
+            ['tab-ops', 'tab-prd', 'tab-audit'].forEach(t => {
+                document.getElementById(t).className = 'inactive-tab py-1 hover:text-blue-400 transition';
+            });
+            if(tabId === 'ops-view') document.getElementById('tab-ops').className = 'active-tab py-1 hover:text-blue-400 transition';
+            if(tabId === 'prd-view') document.getElementById('tab-prd').className = 'active-tab py-1 hover:text-blue-400 transition';
+            if(tabId === 'audit-view') document.getElementById('tab-audit').className = 'active-tab py-1 hover:text-blue-400 transition';
+        }
+
+        function log(msg) {
+            const box = document.getElementById("stream-box");
+            const time = new Date().toLocaleTimeString();
+            box.textContent += `\n[${time}] ${msg}`;
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById("stream-box").textContent = "[CONSOLE CLEARED]";
+        }
+
+        async function syncMetrics() {
+            try {
+                const res = await fetch("/api/state/metrics");
+                if (res.ok) {
+                    const data = await res.json();
+                    const taxVal = "₹" + (data.tax_escrow_balance || 0).toLocaleString('en-IN', {minimumFractionDigits: 2});
+                    const supVal = "₹" + (data.supplier_balance || 0).toLocaleString('en-IN', {minimumFractionDigits: 2});
+                    const upiVal = "₹" + (data.upi_drawdown || 0).toLocaleString('en-IN', {minimumFractionDigits: 2});
+
+                    document.getElementById("tax-escrow").textContent = taxVal;
+                    document.getElementById("supplier-bal").textContent = supVal;
+                    document.getElementById("upi-od").textContent = upiVal;
+
+                    document.getElementById("audit-tax").textContent = taxVal;
+                    document.getElementById("audit-supplier").textContent = supVal;
+                    document.getElementById("audit-upi").textContent = upiVal;
+                }
+            } catch (err) {}
+        }
+
+        async function runConsent() {
+            log(">>> INITIATING SETU AA CONSENT REQUEST...");
+            try {
+                const res = await fetch("/api/v1/setu/consent", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({ mobile: "9999999999" })
+                });
+                const data = await res.json();
+                currentConsentId = data.consent_id || "";
+                log(`<<< CONSENT INITIATED [ID: ${currentConsentId}]`);
+                if (data.redirect_url) {
+                    log(`>>> OPENING ANUMATI SANDBOX WEBVIEW: ${data.redirect_url}`);
+                    window.open(data.redirect_url, "_blank");
+                }
+            } catch (e) {
+                log(`[ERROR] ${e}`);
+            }
+        }
+
+        async function pullData() {
+            if (!currentConsentId) {
+                log("[WARN] No active consent artifact found. Initiating default...");
+                currentConsentId = "c575a370-6308-4b53-a7f0-138f417fba8b";
+            }
+            log(`>>> PULLING FINANCIAL DATA FOR ARTIFACT: ${currentConsentId}...`);
+            try {
+                const res = await fetch(`/api/v1/setu/financial-data/${currentConsentId}`);
+                const data = await res.json();
+                log("<<< FINANCIAL DATA ARTIFACT RECEIVED:\n" + JSON.stringify(data, null, 2));
+            } catch (e) {
+                log(`[ERROR] ${e}`);
+            }
+        }
+
+        async function triggerInvoiceSettlement() {
+            const invNum = "ACC-SINV-" + Math.floor(10000 + Math.random() * 90000);
+            log(`>>> DISPATCHING M2M ERP INVOICE PAYLOAD: ${invNum}...`);
+            try {
+                const res = await fetch("/api/v1/erp/webhook/erpnext", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({
+                        doc: {
+                            name: invNum,
+                            grand_total: 118000.0,
+                            company_gstin: "27AABCU9603R1ZM",
+                            billing_address_gstin: "27AABCT1332L1ZV"
+                        }
+                    })
+                });
+                const data = await res.json();
+                log(`<<< SETTLEMENT CONFIRMED: ${JSON.stringify(data)}`);
+                await syncMetrics();
+            } catch (e) {
+                log(`[ERROR] ${e}`);
+            }
+        }
+
+        setInterval(syncMetrics, 3000);
+        syncMetrics();
+    </script>
+</body>
+</html>
