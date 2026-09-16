@@ -2,6 +2,7 @@
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import os
+from datetime import datetime
 
 app = FastAPI(title="BharatRails DPI Control Plane")
 
@@ -13,15 +14,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# In-Memory Double-Entry Ledger State
 ledger_state = {
     "tax_escrow_balance": 63000.00,
     "supplier_balance": 350000.00,
     "upi_drawdown": 45000.00,
     "mule_status": "CLEARED / ACTIVE",
-    "transactions": [
-        {"ref": "TXN-INIT-001", "account": "ACC-GST-ESCROW", "amount": 63000.00, "type": "CREDIT"},
-        {"ref": "TXN-INIT-002", "account": "ACC-SUPPLIER-PAYABLE", "amount": 350000.00, "type": "CREDIT"}
+    "journal": [
+        {"timestamp": "12:00:01", "ref": "INIT-TXN-001", "account": "ACC-GST-ESCROW", "description": "Statutory GST Isolation (Nodal Pool)", "type": "CREDIT", "amount": 63000.00},
+        {"timestamp": "12:00:01", "ref": "INIT-TXN-002", "account": "ACC-SUPPLIER-PAYABLE", "description": "Net Supplier Payables", "type": "CREDIT", "amount": 350000.00},
+        {"timestamp": "12:05:22", "ref": "INIT-TXN-003", "account": "ACC-UPI-CREDIT-FACILITY", "description": "UPI Delegated Circle Drawdown", "type": "DEBIT", "amount": 45000.00}
     ]
 }
 
@@ -41,19 +42,31 @@ async def erp_webhook(request: Request):
     payload = await request.json()
     doc = payload.get("doc", {})
     grand_total = float(doc.get("grand_total", 118000.0))
-    inv_num = doc.get("name", "INV-M2M-AUTOMATED")
+    inv_num = doc.get("name", f"INV-{int(datetime.now().timestamp())}")
 
     # 18% GST Isolation under RBI PA / Nodal Escrow Regulations
     gst_component = round(grand_total * (18 / 118), 2)
     net_supplier = round(grand_total - gst_component, 2)
+    now_str = datetime.now().strftime("%H:%M:%S")
 
     ledger_state["tax_escrow_balance"] += gst_component
     ledger_state["supplier_balance"] += net_supplier
-    ledger_state["transactions"].append({
+
+    ledger_state["journal"].insert(0, {
+        "timestamp": now_str,
         "ref": inv_num,
         "account": "ACC-GST-ESCROW",
-        "amount": gst_component,
-        "type": "CREDIT"
+        "description": "18% GST Statutory Sequestration",
+        "type": "CREDIT",
+        "amount": gst_component
+    })
+    ledger_state["journal"].insert(0, {
+        "timestamp": now_str,
+        "ref": inv_num,
+        "account": "ACC-SUPPLIER-PAYABLE",
+        "description": "Commercial Net Supplier Settlement",
+        "type": "CREDIT",
+        "amount": net_supplier
     })
 
     return JSONResponse({
