@@ -1,4 +1,4 @@
-﻿import os
+import os
 import uuid
 from datetime import datetime, timezone, timedelta
 from typing import Dict, Any
@@ -47,7 +47,7 @@ class SetuAAClient:
             "status": "PENDING",
             "consent_id": consent_id,
             "vua": vua,
-            "redirect_url": f"https://anumati.setu.co/{consent_id}?redirect_url=https://institutional-fintech-suite.onrender.com/api/v1/setu/callback",
+            "redirect_url": f"https://anumati-sandbox.setu.co/{consent_id}?redirect_url=https://institutional-fintech-suite.onrender.com/api/v1/setu/callback",
             "fi_types": ["DEPOSIT"],
             "data_range": {"from": start_date, "to": end_date}
         }
