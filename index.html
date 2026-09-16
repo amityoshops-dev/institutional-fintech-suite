@@ -105,21 +105,48 @@
 
                 <div>
                     <h3 class="font-bold text-slate-900 text-base">2. Architecture & Data Flow</h3>
-                    <div class="bg-slate-950 text-emerald-400 p-4 rounded-lg font-mono text-xs mt-2 overflow-x-auto leading-relaxed">
+<div class="bg-slate-950 text-emerald-400 p-4 rounded-lg font-mono text-xs mt-2 overflow-x-auto leading-relaxed">
 ERP (Frappe / ERPNext) --[M2M REST Webhook]--> BharatRails Ingress Gateway (Port 8080)
 ├── Double-Entry Engine:
 │   ├── Debits:  ACC-CUSTOMER-RECEIVABLE (Grand Total)
-│   ├── Credits: ACC-GST-ESCROW (18% Statutory Tax Isolated)
-│   └── Credits: ACC-SUPPLIER-PAYABLE (Net Commercial Value)
+│   ├── Credits: ACC-GST-ESCROW (18% Statutory Tax Isolated via [Total x 18/118])
+│   └── Credits: ACC-SUPPLIER-PAYABLE (Net Commercial Settlement)
 ├── Account Aggregator (Setu Sandbox / Sahamati Rail):
 │   └── Extracts 180-Day Cash Flow Profile --> ULI Underwriting Engine
 └── Graph Risk Watchdog:
     └── Analyzes Transaction Fan-Out --> Applies Automated Lien Freezes
-                    </div>
-                </div>
+</div>
 
-                <div>
-                    <h3 class="font-bold text-slate-900 text-base">3. Monetization & Commercial Mechanics</h3>
+<!-- Explicit Mathematical Derivation Table -->
+<div class="mt-4 border border-slate-200 rounded-lg p-4 bg-slate-50">
+    <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">Baseline Seed State & Calculation Matrix (Test Harness)</h4>
+    <table class="w-full text-left text-xs border-collapse font-mono">
+        <thead>
+            <tr class="border-b border-slate-300 text-slate-500">
+                <th class="py-1">Account Target</th>
+                <th class="py-1">Baseline Value</th>
+                <th class="py-1">Derivation Logic / Source</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-200 text-slate-700">
+            <tr>
+                <td class="py-1.5 font-bold text-emerald-700">ACC-GST-ESCROW</td>
+                <td class="py-1.5 font-bold">₹63,000.00</td>
+                <td class="py-1.5">18% GST isolated on ₹4,13,000 gross batch: (4,13,000 × 18/118)</td>
+            </tr>
+            <tr>
+                <td class="py-1.5 font-bold text-blue-700">ACC-SUPPLIER-PAYABLE</td>
+                <td class="py-1.5 font-bold">₹3,50,000.00</td>
+                <td class="py-1.5">Net commercial value: (₹4,13,000 gross − ₹63,000 GST escrow)</td>
+            </tr>
+            <tr>
+                <td class="py-1.5 font-bold text-amber-700">ACC-UPI-CREDIT-FACILITY</td>
+                <td class="py-1.5 font-bold">₹45,000.00</td>
+                <td class="py-1.5">Delegated secondary OD limit drawn via UPI Circle mandate</td>
+            </tr>
+        </tbody>
+    </table>
+</div><h3 class="font-bold text-slate-900 text-base">3. Monetization & Commercial Mechanics</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-2">
                         <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
                             <div class="font-bold text-slate-900 text-xs uppercase">Treasury Float Yield</div>
@@ -377,3 +404,4 @@ ERP (Frappe / ERPNext) --[M2M REST Webhook]--> BharatRails Ingress Gateway (Port
     </script>
 </body>
 </html>
+
