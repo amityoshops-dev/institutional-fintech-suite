@@ -12,7 +12,7 @@
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans min-h-screen flex flex-col antialiased">
 
-    <!-- Top Navigation Header (Light Theme) -->
+    <!-- Top Navigation Header -->
     <header class="border-b border-slate-200 bg-white px-6 py-4 flex flex-wrap justify-between items-center sticky top-0 z-50 shadow-sm">
         <div class="flex items-center space-x-3">
             <span class="p-2.5 bg-blue-600 text-white rounded-lg text-sm font-black tracking-wider">BR</span>
@@ -34,7 +34,6 @@
 
     <!-- Tab 1: Live Operations View -->
     <main id="ops-view" class="p-6 max-w-7xl mx-auto w-full space-y-6">
-        <!-- Balance Cards -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div class="bg-white border border-slate-200 p-5 rounded-xl shadow-sm">
                 <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tax Escrow Holding</div>
@@ -61,7 +60,6 @@
             </div>
         </div>
 
-        <!-- Controls & Console -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm space-y-4">
                 <h2 class="text-xs font-bold tracking-wider uppercase text-slate-600">Operations Control Center</h2>
@@ -105,7 +103,7 @@
 
                 <div>
                     <h3 class="font-bold text-slate-900 text-base">2. Architecture & Data Flow</h3>
-<div class="bg-slate-950 text-emerald-400 p-4 rounded-lg font-mono text-xs mt-2 overflow-x-auto leading-relaxed">
+                    <div class="bg-slate-950 text-emerald-400 p-4 rounded-lg font-mono text-xs mt-2 overflow-x-auto leading-relaxed">
 ERP (Frappe / ERPNext) --[M2M REST Webhook]--> BharatRails Ingress Gateway (Port 8080)
 ├── Double-Entry Engine:
 │   ├── Debits:  ACC-CUSTOMER-RECEIVABLE (Grand Total)
@@ -115,38 +113,61 @@ ERP (Frappe / ERPNext) --[M2M REST Webhook]--> BharatRails Ingress Gateway (Port
 │   └── Extracts 180-Day Cash Flow Profile --> ULI Underwriting Engine
 └── Graph Risk Watchdog:
     └── Analyzes Transaction Fan-Out --> Applies Automated Lien Freezes
-</div>
+                    </div>
 
-<!-- Explicit Mathematical Derivation Table -->
-<div class="mt-4 border border-slate-200 rounded-lg p-4 bg-slate-50">
-    <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">Baseline Seed State & Calculation Matrix (Test Harness)</h4>
-    <table class="w-full text-left text-xs border-collapse font-mono">
-        <thead>
-            <tr class="border-b border-slate-300 text-slate-500">
-                <th class="py-1">Account Target</th>
-                <th class="py-1">Baseline Value</th>
-                <th class="py-1">Derivation Logic / Source</th>
-            </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-200 text-slate-700">
-            <tr>
-                <td class="py-1.5 font-bold text-emerald-700">ACC-GST-ESCROW</td>
-                <td class="py-1.5 font-bold">₹63,000.00</td>
-                <td class="py-1.5">18% GST isolated on ₹4,13,000 gross batch: (4,13,000 × 18/118)</td>
-            </tr>
-            <tr>
-                <td class="py-1.5 font-bold text-blue-700">ACC-SUPPLIER-PAYABLE</td>
-                <td class="py-1.5 font-bold">₹3,50,000.00</td>
-                <td class="py-1.5">Net commercial value: (₹4,13,000 gross − ₹63,000 GST escrow)</td>
-            </tr>
-            <tr>
-                <td class="py-1.5 font-bold text-amber-700">ACC-UPI-CREDIT-FACILITY</td>
-                <td class="py-1.5 font-bold">₹45,000.00</td>
-                <td class="py-1.5">Delegated secondary OD limit drawn via UPI Circle mandate</td>
-            </tr>
-        </tbody>
-    </table>
-</div><h3 class="font-bold text-slate-900 text-base">3. Monetization & Commercial Mechanics</h3>
+                    <!-- Baseline Calculation Matrix -->
+                    <div class="mt-4 border border-slate-200 rounded-lg p-4 bg-slate-50">
+                        <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">Baseline Seed State & Calculation Matrix (Test Harness)</h4>
+                        <table class="w-full text-left text-xs border-collapse font-mono">
+                            <thead>
+                                <tr class="border-b border-slate-300 text-slate-500">
+                                    <th class="py-1">Account Target</th>
+                                    <th class="py-1">Baseline Value</th>
+                                    <th class="py-1">Derivation Logic / Formula</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 text-slate-700">
+                                <tr>
+                                    <td class="py-1.5 font-bold text-emerald-700">ACC-GST-ESCROW</td>
+                                    <td class="py-1.5 font-bold">₹63,000.00</td>
+                                    <td class="py-1.5">18% GST isolated on ₹4,13,000 gross batch: (₹4,13,000 × 18/118)</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-1.5 font-bold text-blue-700">ACC-SUPPLIER-PAYABLE</td>
+                                    <td class="py-1.5 font-bold">₹350,000.00</td>
+                                    <td class="py-1.5">Net commercial value: (₹4,13,000 gross − ₹63,000 GST escrow)</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-1.5 font-bold text-amber-700">ACC-UPI-CREDIT-FACILITY</td>
+                                    <td class="py-1.5 font-bold">₹45,000.00</td>
+                                    <td class="py-1.5">Delegated secondary OD facility drawn via UPI Circle mandate</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Functional Lifecycle Breakdown -->
+                        <div class="mt-4 pt-3 border-t border-slate-200">
+                            <h4 class="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2">Operational Execution Flow (What It Does)</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px] text-slate-600 font-sans">
+                                <div class="p-2.5 bg-white rounded border border-slate-200">
+                                    <span class="font-bold text-blue-600 block mb-1">1. Inbound Ingress</span>
+                                    ERP webhook dispatches invoice payload; gateway verifies counterparty GSTIN and risk status.
+                                </div>
+                                <div class="p-2.5 bg-white rounded border border-slate-200">
+                                    <span class="font-bold text-emerald-600 block mb-1">2. Atomic Sequestration</span>
+                                    18% tax component is isolated into non-operating escrow; net balance cleared to supplier.
+                                </div>
+                                <div class="p-2.5 bg-white rounded border border-slate-200">
+                                    <span class="font-bold text-slate-800 block mb-1">3. Float & Reconciliation</span>
+                                    Corporate treasury captures float yield until statutory tax clearance; zero manual reconciliation.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-slate-900 text-base">3. Monetization & Commercial Mechanics</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-2">
                         <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
                             <div class="font-bold text-slate-900 text-xs uppercase">Treasury Float Yield</div>
@@ -168,7 +189,6 @@ ERP (Frappe / ERPNext) --[M2M REST Webhook]--> BharatRails Ingress Gateway (Port
 
     <!-- Tab 3: Real-Time Double-Entry Ledger View -->
     <main id="audit-view" class="p-6 max-w-6xl mx-auto w-full space-y-6 hidden">
-        <!-- Balances Summary -->
         <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm space-y-4">
             <div class="flex justify-between items-center">
                 <div>
@@ -214,7 +234,6 @@ ERP (Frappe / ERPNext) --[M2M REST Webhook]--> BharatRails Ingress Gateway (Port
             </div>
         </div>
 
-        <!-- Dynamic Journal Entries Table -->
         <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm space-y-4">
             <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Journal Entries & Audit Log</h3>
             <div class="overflow-x-auto">
@@ -285,12 +304,12 @@ ERP (Frappe / ERPNext) --[M2M REST Webhook]--> BharatRails Ingress Gateway (Port
                 const supVal = "₹" + Number(data.supplier_balance || 0).toLocaleString('en-IN', {minimumFractionDigits: 2});
                 const upiVal = "₹" + Number(data.upi_drawdown || 0).toLocaleString('en-IN', {minimumFractionDigits: 2});
 
-                // Update tab 1
+                // Update Tab 1 cards
                 if (document.getElementById("tax-escrow")) document.getElementById("tax-escrow").textContent = taxVal;
                 if (document.getElementById("supplier-bal")) document.getElementById("supplier-bal").textContent = supVal;
                 if (document.getElementById("upi-od")) document.getElementById("upi-od").textContent = upiVal;
 
-                // Update tab 3
+                // Update Tab 3 ledger cards
                 if (document.getElementById("audit-tax")) document.getElementById("audit-tax").textContent = taxVal;
                 if (document.getElementById("audit-supplier")) document.getElementById("audit-supplier").textContent = supVal;
                 if (document.getElementById("audit-upi")) document.getElementById("audit-upi").textContent = upiVal;
@@ -322,7 +341,6 @@ ERP (Frappe / ERPNext) --[M2M REST Webhook]--> BharatRails Ingress Gateway (Port
 
         async function refreshLedgerManually() {
             const btn = document.getElementById("refresh-btn");
-            const icon = document.getElementById("refresh-icon");
             const text = document.getElementById("refresh-text");
             if (btn) {
                 text.textContent = "Syncing...";
@@ -404,4 +422,3 @@ ERP (Frappe / ERPNext) --[M2M REST Webhook]--> BharatRails Ingress Gateway (Port
     </script>
 </body>
 </html>
-

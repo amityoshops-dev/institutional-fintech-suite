@@ -21,7 +21,7 @@ ledger_state = {
     "mule_status": "CLEARED / ACTIVE",
     "journal": [
         {"timestamp": "12:00:01", "ref": "INIT-TXN-001", "account": "ACC-GST-ESCROW", "description": "Statutory GST Isolation (Nodal Pool)", "type": "CREDIT", "amount": 63000.00},
-        {"timestamp": "12:00:01", "ref": "INIT-TXN-002", "account": "ACC-SUPPLIER-PAYABLE", "description": "Net Supplier Payables", "type": "CREDIT", "amount": 350000.00},
+        {"timestamp": "12:00:01", "ref": "INIT-TXN-002", "account": "ACC-SUPPLIER-PAYABLE", "description": "Net Supplier Commercial Balance", "type": "CREDIT", "amount": 350000.00},
         {"timestamp": "12:05:22", "ref": "INIT-TXN-003", "account": "ACC-UPI-CREDIT-FACILITY", "description": "UPI Delegated Circle Drawdown", "type": "DEBIT", "amount": 45000.00}
     ]
 }
