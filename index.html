@@ -88,106 +88,110 @@
     <main id="prd-view" class="p-6 max-w-5xl mx-auto w-full space-y-8 hidden">
         <div class="bg-white border border-slate-200 p-8 rounded-xl shadow-sm space-y-6">
             <div>
-                <span class="px-2.5 py-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded-md">TECHNICAL SPECIFICATION</span>
-                <h2 class="text-2xl font-black text-slate-900 mt-2">Institutional Product Requirement Document (PRD)</h2>
-                <p class="text-xs text-slate-500 mt-1 font-mono">Spec Identifier: BR-DPI-2026-v2 | Scope: RBI PA/PG Nodal Accounting & DPI Rails</p>
+                <span class="px-2.5 py-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded-md">OPERATIONAL BLUEPRINT</span>
+                <h2 class="text-2xl font-black text-slate-900 mt-2">Product Requirement Document (PRD): Automated Escrow Splitting</h2>
+                <p class="text-xs text-slate-500 mt-1 font-mono">Document: BR-DPI-2026-v2 | Focus: Elimination of Co-Mingled Tax Liabilities & Automated CMS Escrow</p>
             </div>
             
             <hr class="border-slate-200">
 
-            <div class="space-y-6 text-sm text-slate-700 leading-relaxed">
-                <div>
-                    <h3 class="font-bold text-slate-900 text-base">1. Problem Statement & Regulatory Context</h3>
-                    <p class="mt-2 text-slate-600">Commercial B2B settlement flows frequently violate compliance audits when statutory tax liabilities (GST) are co-mingled with supplier payables. Under RBI Guidelines on Regulation of Payment Aggregators and Payment Gateways, all incoming commercial funds must be pooled into dedicated nodal/escrow accounts with immediate automated isolation of statutory taxes into non-operating escrow sub-ledgers prior to supplier settlement.</p>
-                </div>
+            <!-- 1. The Real-World Banking Problem -->
+            <div class="space-y-3">
+                <h3 class="font-bold text-slate-900 text-base flex items-center space-x-2">
+                    <span class="p-1 bg-rose-100 text-rose-700 rounded text-xs">PROBLEM</span>
+                    <span>1. The "Co-Mingled Funds" Risk in Corporate Banking</span>
+                </h3>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    When a buyer settles a B2B invoice (e.g., <strong>₹1,18,000</strong> consisting of ₹1,00,000 base + ₹18,000 18% GST), standard banking transfers the entire ₹1,18,000 into the supplier’s general current account. 
+                    This <strong>co-mingles</strong> statutory tax liabilities with operating capital. If the supplier suffers an overdraft freeze, diverts the funds, or enters insolvency before paying GST on the 20th of the month, the tax liability defaults, creating audit failures, input tax credit (ITC) blockages for the buyer, and compliance penalties under RBI PA/PG norms.
+                </p>
+            </div>
 
-                <div>
-                    <h3 class="font-bold text-slate-900 text-base">2. Architecture & Data Flow</h3>
-                    <div class="bg-slate-950 text-emerald-400 p-4 rounded-lg font-mono text-xs mt-2 overflow-x-auto leading-relaxed">
-ERP (Frappe / ERPNext) --[M2M REST Webhook]--> BharatRails Ingress Gateway (Port 8080)
-├── Double-Entry Engine:
-│   ├── Debits:  ACC-CUSTOMER-RECEIVABLE (Grand Total)
-│   ├── Credits: ACC-GST-ESCROW (18% Statutory Tax Isolated via [Total x 18/118])
-│   └── Credits: ACC-SUPPLIER-PAYABLE (Net Commercial Settlement)
-├── Account Aggregator (Setu Sandbox / Sahamati Rail):
-│   └── Extracts 180-Day Cash Flow Profile --> ULI Underwriting Engine
-└── Graph Risk Watchdog:
-    └── Analyzes Transaction Fan-Out --> Applies Automated Lien Freezes
+            <!-- 2. The Solution: Step-by-Step Mechanism -->
+            <div class="space-y-4">
+                <h3 class="font-bold text-slate-900 text-base flex items-center space-x-2">
+                    <span class="p-1 bg-emerald-100 text-emerald-700 rounded text-xs">SOLUTION</span>
+                    <span>2. How BharatRails Solves This (Atomic Split)</span>
+                </h3>
+
+                <!-- Visual Step-by-Step Flow Chart -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                        <div class="font-black text-blue-600 text-sm">STEP 1: Inbound Webhook</div>
+                        <p class="text-slate-600 leading-relaxed">Corporate ERP (Frappe/SAP) posts an invoice for <strong>₹1,18,000</strong>. The gateway creates a temporary virtual account and validates counterparty GSTINs.</p>
                     </div>
-
-                    <!-- Baseline Calculation Matrix -->
-                    <div class="mt-4 border border-slate-200 rounded-lg p-4 bg-slate-50">
-                        <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">Baseline Seed State & Calculation Matrix (Test Harness)</h4>
-                        <table class="w-full text-left text-xs border-collapse font-mono">
-                            <thead>
-                                <tr class="border-b border-slate-300 text-slate-500">
-                                    <th class="py-1">Account Target</th>
-                                    <th class="py-1">Baseline Value</th>
-                                    <th class="py-1">Derivation Logic / Formula</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-200 text-slate-700">
-                                <tr>
-                                    <td class="py-1.5 font-bold text-emerald-700">ACC-GST-ESCROW</td>
-                                    <td class="py-1.5 font-bold">₹63,000.00</td>
-                                    <td class="py-1.5">18% GST isolated on ₹4,13,000 gross batch: (₹4,13,000 × 18/118)</td>
-                                </tr>
-                                <tr>
-                                    <td class="py-1.5 font-bold text-blue-700">ACC-SUPPLIER-PAYABLE</td>
-                                    <td class="py-1.5 font-bold">₹350,000.00</td>
-                                    <td class="py-1.5">Net commercial value: (₹4,13,000 gross − ₹63,000 GST escrow)</td>
-                                </tr>
-                                <tr>
-                                    <td class="py-1.5 font-bold text-amber-700">ACC-UPI-CREDIT-FACILITY</td>
-                                    <td class="py-1.5 font-bold">₹45,000.00</td>
-                                    <td class="py-1.5">Delegated secondary OD facility drawn via UPI Circle mandate</td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                        <!-- Functional Lifecycle Breakdown -->
-                        <div class="mt-4 pt-3 border-t border-slate-200">
-                            <h4 class="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2">Operational Execution Flow (What It Does)</h4>
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px] text-slate-600 font-sans">
-                                <div class="p-2.5 bg-white rounded border border-slate-200">
-                                    <span class="font-bold text-blue-600 block mb-1">1. Inbound Ingress</span>
-                                    ERP webhook dispatches invoice payload; gateway verifies counterparty GSTIN and risk status.
-                                </div>
-                                <div class="p-2.5 bg-white rounded border border-slate-200">
-                                    <span class="font-bold text-emerald-600 block mb-1">2. Atomic Sequestration</span>
-                                    18% tax component is isolated into non-operating escrow; net balance cleared to supplier.
-                                </div>
-                                <div class="p-2.5 bg-white rounded border border-slate-200">
-                                    <span class="font-bold text-slate-800 block mb-1">3. Float & Reconciliation</span>
-                                    Corporate treasury captures float yield until statutory tax clearance; zero manual reconciliation.
-                                </div>
-                            </div>
-                        </div>
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                        <div class="font-black text-emerald-600 text-sm">STEP 2: Atomic Ledger Split</div>
+                        <p class="text-slate-600 leading-relaxed">The double-entry switch isolates <strong>₹18,000</strong> directly to <code>ACC-GST-ESCROW</code> and assigns <strong>₹1,00,000</strong> to <code>ACC-SUPPLIER-PAYABLE</code> simultaneously.</p>
+                    </div>
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                        <div class="font-black text-indigo-600 text-sm">STEP 3: Dual Execution</div>
+                        <p class="text-slate-600 leading-relaxed">The supplier receives their ₹1,00,000 immediately via RTGS. The ₹18,000 tax balance remains locked in escrow until direct statutory GSTN clearing.</p>
                     </div>
                 </div>
+            </div>
 
-                <div>
-                    <h3 class="font-bold text-slate-900 text-base">3. Monetization & Commercial Mechanics</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-2">
-                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
-                            <div class="font-bold text-slate-900 text-xs uppercase">Treasury Float Yield</div>
-                            <div class="text-xs text-slate-600 mt-1">Earns interest yield on aggregated GST balances held in nodal escrow pending periodic statutory tax clearance.</div>
-                        </div>
-                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
-                            <div class="font-bold text-slate-900 text-xs uppercase">B2B Take Rate</div>
-                            <div class="text-xs text-slate-600 mt-1">15–45 bps charged on gross settled B2B invoice volume cleared through API banking rails.</div>
-                        </div>
-                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
-                            <div class="font-bold text-slate-900 text-xs uppercase">ULI / LSP Spread</div>
-                            <div class="text-xs text-slate-600 mt-1">1.5–2.0% origination fee on automated working capital credit sanctioned via AA cashflow underwriting.</div>
-                        </div>
+            <!-- 3. Exact Account Derivation Table -->
+            <div class="space-y-3">
+                <h3 class="font-bold text-slate-900 text-base flex items-center space-x-2">
+                    <span class="p-1 bg-blue-100 text-blue-700 rounded text-xs">DATA MODEL</span>
+                    <span>3. Baseline Test Harness Ledger (Why ₹63,000 and ₹350,000?)</span>
+                </h3>
+                <p class="text-xs text-slate-600">The platform boots with a pre-seeded institutional batch totaling <strong>₹4,13,000.00</strong> to demonstrate persistent double-entry integrity:</p>
+                
+                <table class="w-full text-left text-xs border-collapse font-mono bg-slate-50 border border-slate-200 rounded-lg overflow-hidden">
+                    <thead>
+                        <tr class="border-b border-slate-200 text-slate-500 bg-slate-100">
+                            <th class="py-2.5 px-3">Account Code</th>
+                            <th class="py-2.5 px-3">Type</th>
+                            <th class="py-2.5 px-3">Value</th>
+                            <th class="py-2.5 px-3">What This Account Actually Represents</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 text-slate-700">
+                        <tr>
+                            <td class="py-2.5 px-3 font-bold text-emerald-700">ACC-GST-ESCROW</td>
+                            <td class="py-2.5 px-3">Liability / Escrow</td>
+                            <td class="py-2.5 px-3 font-bold">₹63,000.00</td>
+                            <td class="py-2.5 px-3">18% GST sequestered across baseline batches (₹4,13,000 × 18/118). Locked from supplier withdrawal.</td>
+                        </tr>
+                        <tr>
+                            <td class="py-2.5 px-3 font-bold text-blue-700">ACC-SUPPLIER-PAYABLE</td>
+                            <td class="py-2.5 px-3">Payable / Commercial</td>
+                            <td class="py-2.5 px-3 font-bold">₹350,000.00</td>
+                            <td class="py-2.5 px-3">Net commercial receivables cleared for supplier payout (₹4,13,000 − ₹63,000).</td>
+                        </tr>
+                        <tr>
+                            <td class="py-2.5 px-3 font-bold text-amber-700">ACC-UPI-CREDIT-FACILITY</td>
+                            <td class="py-2.5 px-3">Credit Facility</td>
+                            <td class="py-2.5 px-3 font-bold">₹45,000.00</td>
+                            <td class="py-2.5 px-3">Secondary overdraft drawdown approved via Setu Account Aggregator underwriting.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 4. Revenue & Commercial Pitch for Bank CMS Teams -->
+            <div class="space-y-3">
+                <h3 class="font-bold text-slate-900 text-base">4. Commercial Monetization (Why Banks Want This)</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                        <div class="font-bold text-slate-900 text-xs uppercase">1. Float Yield</div>
+                        <div class="text-xs text-slate-600 mt-1">Tax escrow balances sit in the bank's nodal pool for 15–30 days prior to filing, giving the bank low-cost CASA float.</div>
+                    </div>
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                        <div class="font-bold text-slate-900 text-xs uppercase">2. B2B Take Rate</div>
+                        <div class="text-xs text-slate-600 mt-1">15 to 45 basis points fee on every invoice settled through automated virtual accounts.</div>
+                    </div>
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                        <div class="font-bold text-slate-900 text-xs uppercase">3. Lending Origination</div>
+                        <div class="text-xs text-slate-600 mt-1">Underwriting invoice receivables through Account Aggregator (AA) data to offer instant revolving credit lines.</div>
                     </div>
                 </div>
             </div>
         </div>
     </main>
-
-    <!-- Tab 3: Real-Time Double-Entry Ledger View -->
+<!-- Tab 3: Real-Time Double-Entry Ledger View -->
     <main id="audit-view" class="p-6 max-w-6xl mx-auto w-full space-y-6 hidden">
         <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm space-y-4">
             <div class="flex justify-between items-center">
@@ -422,3 +426,4 @@ ERP (Frappe / ERPNext) --[M2M REST Webhook]--> BharatRails Ingress Gateway (Port
     </script>
 </body>
 </html>
+
