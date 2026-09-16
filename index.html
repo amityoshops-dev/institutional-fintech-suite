@@ -12,7 +12,6 @@
 </head>
 <body class="bg-slate-950 text-slate-100 font-mono min-h-screen flex flex-col">
 
-    <!-- Top Navigation Header -->
     <header class="border-b border-slate-800 bg-slate-900/60 px-6 py-4 flex flex-wrap justify-between items-center sticky top-0 z-50 backdrop-blur">
         <div class="flex items-center space-x-3">
             <span class="p-2 bg-blue-600 rounded text-lg font-bold">BR</span>
@@ -22,7 +21,6 @@
             </div>
         </div>
 
-        <!-- Navigation Tabs -->
         <nav class="flex space-x-6 mt-3 sm:mt-0 text-sm font-semibold">
             <button onclick="switchTab('ops-view')" id="tab-ops" class="active-tab py-1 hover:text-blue-400 transition">Console & Telemetry</button>
             <button onclick="switchTab('prd-view')" id="tab-prd" class="inactive-tab py-1 hover:text-blue-400 transition">Institutional PRD & Architecture</button>
@@ -32,34 +30,32 @@
 
     <!-- Tab 1: Live Operations View -->
     <main id="ops-view" class="p-6 max-w-7xl mx-auto w-full space-y-6">
-        <!-- Balance Cards Grid -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div class="bg-slate-900 border border-slate-800 p-4 rounded-lg shadow">
                 <div class="text-xs text-slate-400 uppercase tracking-wider">Tax Escrow Holding</div>
-                <div id="tax-escrow" class="text-2xl font-bold text-emerald-400 mt-2">₹0.00</div>
+                <div id="tax-escrow" class="text-2xl font-bold text-emerald-400 mt-2">₹63,000.00</div>
                 <div class="text-[11px] text-emerald-500 mt-1">● 18% GST Isolated (ACC-GST-ESCROW)</div>
             </div>
 
             <div class="bg-slate-900 border border-slate-800 p-4 rounded-lg shadow">
                 <div class="text-xs text-slate-400 uppercase tracking-wider">Supplier Net Balance</div>
-                <div id="supplier-bal" class="text-2xl font-bold text-blue-400 mt-2">₹0.00</div>
+                <div id="supplier-bal" class="text-2xl font-bold text-blue-400 mt-2">₹350,000.00</div>
                 <div class="text-[11px] text-blue-500 mt-1">● Base Commercial Settlement</div>
             </div>
 
             <div class="bg-slate-900 border border-slate-800 p-4 rounded-lg shadow">
                 <div class="text-xs text-slate-400 uppercase tracking-wider">UPI Overdraft Drawn</div>
-                <div id="upi-od" class="text-2xl font-bold text-amber-400 mt-2">₹0.00</div>
+                <div id="upi-od" class="text-2xl font-bold text-amber-400 mt-2">₹45,000.00</div>
                 <div class="text-[11px] text-amber-500 mt-1">● Secondary Drawdown</div>
             </div>
 
             <div class="bg-slate-900 border border-slate-800 p-4 rounded-lg shadow">
                 <div class="text-xs text-slate-400 uppercase tracking-wider">Mule Threat Status</div>
-                <div id="mule-status" class="text-2xl font-bold text-rose-400 mt-2">MONITORING</div>
-                <div class="text-[11px] text-slate-400 mt-1">● Port 8002 Graph Watchdog</div>
+                <div id="mule-status" class="text-2xl font-bold text-emerald-400 mt-2">CLEARED</div>
+                <div class="text-[11px] text-slate-400 mt-1">● Graph Risk Watchdog Active</div>
             </div>
         </div>
 
-        <!-- Action Controls & Stream -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="bg-slate-900 border border-slate-800 p-5 rounded-lg space-y-4">
                 <h2 class="text-sm font-bold tracking-wide uppercase text-slate-300">Action Controls</h2>
@@ -73,7 +69,7 @@
                     <span class="text-emerald-400 font-bold">● INBOUND TELEMETRY STREAM</span>
                     <button onclick="clearLogs()" class="text-slate-500 hover:text-slate-300 text-xs">Clear Console</button>
                 </div>
-                <pre id="stream-box" class="flex-1 overflow-y-auto text-xs text-emerald-400 font-mono whitespace-pre-wrap leading-relaxed">[SYSTEM READY] BharatRails gateway listening on Port 8080...</pre>
+                <pre id="stream-box" class="flex-1 overflow-y-auto text-xs text-emerald-400 font-mono whitespace-pre-wrap leading-relaxed">[SYSTEM READY] BharatRails gateway online and syncing double-entry ledger state...</pre>
             </div>
         </div>
     </main>
@@ -91,15 +87,15 @@
 
                 <h3 class="font-bold text-slate-100 text-base">2. Architecture & Data Flow</h3>
                 <div class="bg-black p-4 rounded border border-slate-800 text-xs font-mono text-slate-300">
-                    ERP (Frappe / ERPNext) --[M2M REST Webhook]--> BharatRails Ingress Gateway (Port 8080)
-                    ├── Double-Entry Engine:
-                    │   ├── Debits: ACC-CUSTOMER-RECEIVABLE (Grand Total)
-                    │   ├── Credits: ACC-GST-ESCROW (18% Statutory Tax Isolated)
-                    │   └── Credits: ACC-SUPPLIER-PAYABLE (Net Commercial Value)
-                    ├── Account Aggregator (Setu Sandbox / Sahamati Rail):
-                    │   └── Extracts 180-Day Cash Flow Profile --> ULI Underwriting Engine
-                    └── Graph Risk Engine (Port 8002):
-                        └── Monitors Transaction Fan-Out --> Applies Automated Lien Freezes
+ERP (Frappe / ERPNext) --[M2M REST Webhook]--> BharatRails Ingress Gateway (Port 8080)
+├── Double-Entry Engine:
+│   ├── Debits: ACC-CUSTOMER-RECEIVABLE (Grand Total)
+│   ├── Credits: ACC-GST-ESCROW (18% Statutory Tax Isolated)
+│   └── Credits: ACC-SUPPLIER-PAYABLE (Net Commercial Value)
+├── Account Aggregator (Setu Sandbox / Sahamati Rail):
+│   └── Extracts 180-Day Cash Flow Profile --> ULI Underwriting Engine
+└── Graph Risk Engine:
+    └── Monitors Transaction Fan-Out --> Applies Automated Lien Freezes
                 </div>
 
                 <h3 class="font-bold text-slate-100 text-base">3. Monetization & Commercial Mechanics</h3>
@@ -116,8 +112,11 @@
     <main id="audit-view" class="p-6 max-w-5xl mx-auto w-full space-y-6 hidden">
         <div class="bg-slate-900 border border-slate-800 p-6 rounded-lg space-y-4">
             <div class="flex justify-between items-center">
-                <h2 class="text-lg font-bold text-slate-200">Double-Entry General Ledger Accounts</h2>
-                <button onclick="syncMetrics()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1 rounded border border-slate-700">Refresh Ledger</button>
+                <div>
+                    <h2 class="text-lg font-bold text-slate-200">Double-Entry General Ledger Accounts</h2>
+                    <p class="text-xs text-slate-400">Real-time state pulled from BharatRails settlement switch</p>
+                </div>
+                <button onclick="syncMetrics()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded border border-slate-700">Refresh Ledger</button>
             </div>
             
             <table class="w-full text-left text-xs border-collapse">
@@ -134,19 +133,19 @@
                         <td class="py-3 px-2 text-emerald-400">ACC-GST-ESCROW</td>
                         <td class="py-3 px-2">Liability / Escrow</td>
                         <td class="py-3 px-2 text-slate-400">Statutory Tax Sequestration (RBI Nodal Pool)</td>
-                        <td id="audit-tax" class="py-3 px-2 text-right text-emerald-400 font-bold">₹0.00</td>
+                        <td id="audit-tax" class="py-3 px-2 text-right text-emerald-400 font-bold">₹63,000.00</td>
                     </tr>
                     <tr>
                         <td class="py-3 px-2 text-blue-400">ACC-SUPPLIER-PAYABLE</td>
                         <td class="py-3 px-2">Payable / Current</td>
                         <td class="py-3 px-2 text-slate-400">Base Commercial Settlement to Supplier</td>
-                        <td id="audit-supplier" class="py-3 px-2 text-right text-blue-400 font-bold">₹0.00</td>
+                        <td id="audit-supplier" class="py-3 px-2 text-right text-blue-400 font-bold">₹350,000.00</td>
                     </tr>
                     <tr>
                         <td class="py-3 px-2 text-amber-400">ACC-UPI-CREDIT-FACILITY</td>
                         <td class="py-3 px-2">Credit / OD Line</td>
                         <td class="py-3 px-2 text-slate-400">Delegated UPI Circle Secondary Drawdown</td>
-                        <td id="audit-upi" class="py-3 px-2 text-right text-amber-400 font-bold">₹0.00</td>
+                        <td id="audit-upi" class="py-3 px-2 text-right text-amber-400 font-bold">₹45,000.00</td>
                     </tr>
                 </tbody>
             </table>
@@ -198,7 +197,9 @@
                     document.getElementById("audit-supplier").textContent = supVal;
                     document.getElementById("audit-upi").textContent = upiVal;
                 }
-            } catch (err) {}
+            } catch (err) {
+                console.error("Telemetry sync error:", err);
+            }
         }
 
         async function runConsent() {
