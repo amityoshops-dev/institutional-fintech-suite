@@ -2,13 +2,14 @@
 import logging
 from typing import Dict, Any
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 import httpx
+from setu_client import SetuAAClient
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("Gateway")
 
-app = FastAPI(title="Unified Institutional Fintech Control Plane", version="3.1.0")
+app = FastAPI(title="Unified Institutional Fintech Control Plane", version="3.2.0")
 
 SWITCHES = {
     "b2b": "http://127.0.0.1:8000",
@@ -48,7 +49,11 @@ async def render_unified_dashboard():
                     </div>
                 </div>
                 <div class="px-4 py-6 space-y-1">
-                    <div class="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-slate-500">Simulation Steps</div>
+                    <div class="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-slate-500">Integrations</div>
+                    <button onclick="triggerSetuConsent()" class="w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold bg-purple-500/10 text-purple-400 border border-purple-500/20 hover:bg-purple-500/20 transition">
+                        <i class="fa-solid fa-file-contract w-4"></i> Setu AA Consent Flow
+                    </button>
+                    <div class="pt-3 px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-slate-500">Simulation Steps</div>
                     <button onclick="executeFullPipeline()" class="w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition">
                         <i class="fa-solid fa-play w-4"></i> Run Full Pipeline (1-Click)
                     </button>
@@ -220,6 +225,22 @@ async def render_unified_dashboard():
                 }
             }
 
+            async function triggerSetuConsent() {
+                log(`>>> INITIATING SETU AA CONSENT (Mobile: 9999999999)...`);
+                try {
+                    const res = await fetch('/api/v1/setu/consent/initiate', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ mobile_number: '9999999999' })
+                    });
+                    const data = await res.json();
+                    log(`<<< SETU CONSENT ARTIFACT CREATED [ID: ${data.consent_id}]:\\n` + JSON.stringify(data, null, 2));
+                    log(`>>> OPENING ANUMATI WEBVIEW APPROVAL LINK: ${data.redirect_url}`);
+                } catch (e) {
+                    log(`!!! SETU AA ERROR: ${e.message}`);
+                }
+            }
+
             async function executeFullPipeline() {
                 log(`>>> INITIATING 1-CLICK END-TO-END TRANSACTION PIPELINE...`);
                 await triggerEngine('/api/b2b/test', 'Step 1: B2B ERP Ingestion');
@@ -284,6 +305,30 @@ async def get_state_metrics():
             pass
     return metrics
 
+# ---------------------------------------------------------
+# SETU AA INTEGRATION ENDPOINTS
+# ---------------------------------------------------------
+@app.post("/api/v1/setu/consent/initiate")
+async def initiate_setu_consent(request: Request):
+    body = await request.json()
+    mobile = body.get("mobile_number", "9999999999")
+    vua = body.get("vua_handle", None)
+    res = await SetuAAClient.create_consent_request(mobile, vua)
+    return JSONResponse(content=res)
+
+@app.get("/api/v1/setu/callback")
+async def setu_consent_callback(request: Request):
+    """Callback landing endpoint after borrower completes Setu Anumati OTP."""
+    params = dict(request.query_params)
+    return {
+        "status": "SETU_CONSENT_APPROVED",
+        "details": params,
+        "message": "Consent artefact successfully registered. AA financial data can now be pulled into ULI underwriting."
+    }
+
+# ---------------------------------------------------------
+# ERP & LOCAL TEST DISPATCHERS
+# ---------------------------------------------------------
 @app.post("/api/v1/erp/webhook/inbound")
 async def receive_external_erp_invoice(request: Request):
     body = await request.json()
@@ -296,7 +341,6 @@ async def receive_external_erp_invoice(request: Request):
     tax_amount = round(total_amount - base_amount, 2)
 
     async with httpx.AsyncClient(timeout=8.0) as client:
-        # 1. Present invoice to Port 8000
         await client.post(f"{SWITCHES['b2b']}/api/v1/invoices/present", json={
             "invoice_id": inv_id,
             "supplier_gstin": supplier_gst,
@@ -312,8 +356,6 @@ async def receive_external_erp_invoice(request: Request):
                 }
             ]
         })
-
-        # 2. Settle on double-entry ledger
         settle_res = await client.post(f"{SWITCHES['b2b']}/api/v1/invoices/{inv_id}/settle", json={
             "buyer_virtual_account": "VA-ERP-BUYER",
             "force_immediate": True
